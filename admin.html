@@ -1,113 +1,98 @@
 <!DOCTYPE html>
-<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Haqtamat Admin - Cloud Only</title>
-<style>body{font-family:sans-serif;background:#0f172a;color:#fff;padding:15px} .card{background:#1e293b;padding:15px;border-radius:12px;max-width:500px;margin:10px auto} input,select{width:100%;padding:11px;margin:6px 0;border-radius:8px;border:none;font-size:15px;box-sizing:border-box} button{width:100%;padding:12px;background:#22c55e;color:#fff;border:none;border-radius:8px;font-size:15px;cursor:pointer;margin:5px 0} .red{background:#dc2626}.blue{background:#2563eb}.light{background:#334155} .hidden{display:none} .row{display:flex;gap:8px} .row button{flex:1} small{color:#94a3b8}</style>
-</head><body>
-<div class="card" id="loginCard"><h2>HAQTAMAT SARAFI - ADMIN</h2><div id="status">Connecting...</div>
-<input id="f1" value="ADMIN"><input id="f2" type="password" placeholder="PIN 1234"><button onclick="doLogin()">LOGIN</button></div>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Haqtamat - Admin</title>
+<style>
+body{font-family:system-ui;background:#0f172a;color:#fff;margin:0;padding:14px}
+.card{background:#1e293b;border-radius:14px;padding:14px;margin:10px 0}
+input,button,select{width:100%;padding:12px;border-radius:10px;border:0;margin:6px 0;font-size:15px;box-sizing:border-box}
+input,select{background:#0f172a;color:#fff;border:1px solid #334155}
+button{background:#22c55e;color:#000;font-weight:700}
+.blue{background:#3b82f6;color:#fff} .red{background:#ef4444;color:#fff} .orange{background:#f59e0b;color:#000}
+.row{display:flex;gap:8px} .row>div{flex:1}
+.tick{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+.tick label{background:#0f172a;border:1px solid #334155;padding:8px 12px;border-radius:20px;font-size:13px;cursor:pointer;display:flex;gap:6px;align-items:center}
+.tick input{width:auto;margin:0}
+.tx{padding:8px 10px;margin:0;border-bottom:1px solid #334155;font-size:13px;line-height:1.4}
+.tx-green{border-left:5px solid #22c55e} .tx-red{border-left:5px solid #ef4444} .tx-blue{border-left:5px solid #3b82f6}
+.small{font-size:11px;color:#cbd5e1}
+.big-in{color:#22c55e;font-size:24px;font-weight:800} .big-out{color:#ef4444;font-size:24px;font-weight:800} .big-bal{color:#facc15;font-size:26px;font-weight:900}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700}
+.b-green{background:#22c55e;color:#000} .b-red{background:#ef4444;color:#fff} .b-blue{background:#3b82f6;color:#fff}
+.tab{display:flex;gap:8px} .tab button{flex:1}
+@media print{body{background:#fff;color:#000} .no-print{display:none} .card{background:#fff;border:1px solid #000} .small{color:#333}}
+</style></head>
+<body>
+<h2>Admin Dashboard - CLOUD</h2>
+<div class="card no-print" id="loginBox"><input id="apin" placeholder="Admin PIN" type="password"><button onclick="alogin()">Login Admin</button></div>
+<div id="app" style="display:none">
+<div class="card no-print"><h3>Create Khata</h3><input id="nkhata" placeholder="Khata Number"><input id="nname" placeholder="Name"><input id="npin" placeholder="PIN"><button onclick="createAcc()">Create</button></div>
 
-<div class="card hidden" id="adminCard">
-<h2>Admin Dashboard - <span id="cloudBadge">CLOUD</span></h2>
-<div id="tot">Loading...</div>
-<div class="row"><button onclick="show('dash')">Dashboard</button><button class="blue" onclick="show('create')">Create</button><button class="blue" onclick="show('money')">Money</button></div>
-<div class="row"><button class="light" onclick="show('list')">All Accounts</button><button class="light" onclick="show('stmt')">Statement</button><button class="red" onclick="show('rev')">Reverse</button></div>
+<div class="card no-print"><h3>Money - IN / OUT</h3>
+<input id="mkhata" placeholder="From Khata Number - Customer Khata">
+<div class="tab"><button onclick="showIn()">⬆ IN - ADD</button><button class="red" onclick="showOut()">⬇ OUT - SEND</button></div>
 
-<div id="dashSec"><h3>Totals</h3><div id="totals"></div><button onclick="loadAll()">REFRESH FROM CLOUD</button></div>
-
-<div id="createSec" class="hidden"><h3>Create Khata</h3>
-<input id="newKhata" placeholder="Khata e.g. 123001002" inputmode="numeric">
-<input id="newName" placeholder="Full Name"><input id="newFather" placeholder="Father Name">
-<input id="newPhone" placeholder="Phone"><input id="newCnic" placeholder="CNIC"><input id="newAddr" placeholder="Address">
-<input id="newPin" placeholder="PIN 1234" inputmode="numeric">
-<button onclick="createCust()">CREATE IN CLOUD</button><div id="okA"></div></div>
-
-<div id="moneySec" class="hidden"><h3>Add / Send Money</h3>
-<input id="mKhata" placeholder="Khata" inputmode="numeric">
-<input id="mAmt" placeholder="Amount PKR" type="number">
-<input id="mNote" placeholder="Note">
-<button onclick="doAdd()">ADD MONEY (IN)</button>
-<button class="red" onclick="doOut()">SEND MONEY (OUT - with 0.05% fee)</button><div id="okM"></div></div>
-
-<div id="listSec" class="hidden"><h3>All Accounts</h3><div id="list"></div></div>
-
-<div id="stmtSec" class="hidden"><h3>Statement</h3>
-<input id="sKhata" placeholder="Khata" inputmode="numeric"><button class="blue" onclick="showStmt()">SHOW STATEMENT</button><div id="stmtOut"></div></div>
-
-<div id="revSec" class="hidden"><h3>Reverse by Ref</h3>
-<input id="rKhata" placeholder="Khata" inputmode="numeric"><input id="rRef" placeholder="Ref e.g. HQM-12345678"><button class="red" onclick="doReverse()">REVERSE</button><div id="revOut"></div></div>
-
-<div id="editSec" class="hidden"><h3>Edit Khata</h3><input id="eKhata" placeholder="Khata" inputmode="numeric">
-<input id="eName" placeholder="Name"><input id="ePhone" placeholder="Phone"><input id="ePin" placeholder="New PIN">
-<input id="eBal" placeholder="Balance" type="number"><button onclick="saveEdit()">SAVE EDIT TO CLOUD</button><div id="okE"></div></div>
+<!-- IN FORM -->
+<div id="inForm">
+<div class="tick"><label><input type="radio" name="payType" value="Cash" checked> ✅ Cash</label><label><input type="radio" name="payType" value="Bank Transfer"> ✅ Bank Transfer</label><label><input type="radio" name="payType" value="Cheque"> ✅ Cheque</label><label><input type="radio" name="payType" value="Online"> ✅ Online</label></div>
+<div class="row"><div><label class="small">Slip No:</label><input id="slipNo" placeholder="Slip No"></div><div><label class="small">Ref No:</label><input id="refNo" placeholder="Ref No"></div></div>
+<div class="row"><div><label class="small">Chq No:</label><input id="chqNo" placeholder="Chq No"></div><div><label class="small">TID:</label><input id="tidNo" placeholder="TID"></div></div>
+<div class="row"><div><label class="small">SEQ No:</label><input id="seqNo" placeholder="SEQ No"></div><div><label class="small">Bank:</label><select id="bankName"><option value="">Select Bank</option><option>Cash</option><option>Meezan Bank</option><option>HBL</option><option>UBL</option><option>MCB</option><option>Alfalah</option><option>Bank Al Habib</option><option>JazzCash</option><option>Easypaisa</option><option>Other</option></select></div></div>
+<label class="small">Amount - Type Amount:</label><input id="mamt" type="number" placeholder="Enter Amount" style="font-size:22px;font-weight:800;border:2px solid #22c55e">
+<button onclick="addMoney()" style="font-size:18px">⬆ IN - ADD MONEY</button>
 </div>
 
+<!-- OUT FORM -->
+<div id="outForm" style="display:none">
+<p class="small">OUT - Send money OUT from customer khata to another bank / account</p>
+<label class="small">Account Title:</label><input id="outTitle" placeholder="Account Title e.g. Muhammad Ahmed">
+<label class="small">AC No: (Optional - can type any random numbers)</label><input id="outAcNo" placeholder="AC No - Optional, type any numbers e.g. 0012345678">
+<label class="small">Bank:</label><select id="outBank"><option value="">Select Bank</option><option>Cash</option><option>Meezan Bank</option><option>HBL</option><option>UBL</option><option>MCB</option><option>Alfalah</option><option>Bank Al Habib</option><option>JazzCash</option><option>Easypaisa</option><option>Other</option></select>
+<div class="tick"><label><input type="radio" name="outType" value="Bank Transfer" checked> ✅ Bank Transfer</label><label><input type="radio" name="outType" value="Cash"> ✅ Cash</label><label><input type="radio" name="outType" value="Cheque"> ✅ Cheque</label></div>
+<div class="row"><div><label class="small">Ref No:</label><input id="outRef" placeholder="Ref No - Optional"></div><div><label class="small">TID / Slip No:</label><input id="outTid" placeholder="TID / Slip - Optional"></div></div>
+<label class="small">Amount - Type Amount:</label><input id="outAmt" type="number" placeholder="Enter Amount" style="font-size:22px;font-weight:800;border:2px solid #ef4444">
+<button class="red" onclick="takeMoney()" style="font-size:18px">⬇ OUT - SEND MONEY</button>
+</div>
+</div>
+
+<div class="card"><h3>All Accounts</h3><div id="list"></div></div>
+<div class="card" id="stmtBox" style="display:none"><h3>Statement</h3><p id="stmtHead"></p><div style="display:flex;gap:10px;text-align:center"><div style="flex:1;background:#14532d33;border-radius:10px;padding:10px"><div class="small">TOTAL IN</div><div class="big-in" id="totIn">0</div></div><div style="flex:1;background:#7f1d1d33;border-radius:10px;padding:10px"><div class="small">TOTAL OUT</div><div class="big-out" id="totOut">0</div></div></div><div style="text-align:center;margin:8px 0"><div class="small">FINAL BALANCE</div><div class="big-bal" id="finalBal">0</div></div><div id="stmtList"></div><button class="blue no-print" onclick="window.print()">Download PDF / Print</button></div>
+</div>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 <script>
-const DB="https://haqtamat-default-rtdb.firebaseio.com";
-let ALL=[];
-function to9(s){s=String(s||'').replace(/[^0-9]/g,''); if(s.length===10&&s.startsWith('0'))s=s.slice(1); if(s.length===12&&s.startsWith('92'))s=s.slice(2); return s;}
-function fmt(n){return Number(n||0).toLocaleString('en-US')}
-function calcFee(a){return Math.max(1,Math.round(a*0.0005))}
-async function getOne(k){let r=await fetch(DB+"/"+to9(k)+".json"); return await r.json();}
-async function putOne(c){let r=await fetch(DB+"/"+c.khata+".json",{method:"PUT",body:JSON.stringify(c)}); return r.ok;}
-async function delOne(k){await fetch(DB+"/"+to9(k)+".json",{method:"DELETE"});}
-async function loadAll(){
-  let r=await fetch(DB+"/.json"); let j=await r.json()||{};
-  ALL=Object.values(j).filter(c=>c&&c.khata&&c.name);
-  document.getElementById('status').innerText="CLOUD CONNECTED - "+ALL.length+" accounts";
-  document.getElementById('tot').innerText=ALL.length+" accounts in Cloud";
-  let cash=ALL.reduce((s,c)=>s+Number(c.bal||0),0), fees=ALL.reduce((s,c)=>s+Number(c.fees||0),0);
-  document.getElementById('totals').innerHTML="Customers: <b>"+ALL.length+"</b><br>Total Cash: <b>"+fmt(cash)+" PKR</b><br>Total Fees: <b>"+fmt(fees)+" PKR</b>";
-  document.getElementById('list').innerHTML=ALL.map((c,i)=>"<div style='padding:10px 0;border-bottom:1px solid #334155'><b>"+c.khata+"</b> - "+c.name+" - PIN "+c.pin+"<br>Bal: <b>"+fmt(c.bal)+" PKR</b> Fees: "+fmt(c.fees)+"<br><div class='row'><button class='blue' onclick=\"viewStmt('"+c.khata+"')\">STATEMENT</button><button class='light' onclick=\"editLoad('"+c.khata+"')\">EDIT</button><button class='red' onclick=\"delCust('"+c.khata+"')\">DELETE</button></div></div>").join('');
-  return ALL;
+var cfg={databaseURL:"https://haqtamat-default-rtdb.firebaseio.com"};
+firebase.initializeApp(cfg); var db=firebase.database();
+function showIn(){document.getElementById('inForm').style.display='block';document.getElementById('outForm').style.display='none';}
+function showOut(){document.getElementById('inForm').style.display='none';document.getElementById('outForm').style.display='block';}
+function alogin(){ if(document.getElementById('apin').value=='1234'){document.getElementById('loginBox').style.display='none';document.getElementById('app').style.display='block';load();} else alert('Wrong PIN'); }
+function createAcc(){ var k=document.getElementById('nkhata').value.trim(), n=document.getElementById('nname').value.trim(), p=document.getElementById('npin').value.trim(); if(!k||!n||!p){alert('Fill all');return;} db.ref('accounts/'+k).set({name:n,pin:p,balance:0,fees:0,tx:[]}).then(()=>{alert('Created');load();}); }
+function addMoney(){
+ var k=document.getElementById('mkhata').value.trim(), a=parseInt(document.getElementById('mamt').value); if(!k||!a){alert('Enter Khata + Amount');return;}
+ var t=document.querySelector('input[name="payType"]:checked'); var f={type:t?t.value:'Cash', slip:document.getElementById('slipNo').value.trim(), ref:document.getElementById('refNo').value.trim()||('TX-'+Date.now().toString().slice(-8)), chq:document.getElementById('chqNo').value.trim(), tid:document.getElementById('tidNo').value.trim(), seq:document.getElementById('seqNo').value.trim(), bank:document.getElementById('bankName').value};
+ db.ref('accounts/'+k).once('value',s=>{ var acc=s.val(); if(!acc){alert('Not found');return;} var nb=(acc.balance||0)+a; var tx=acc.tx||[]; tx.push({date:new Date().toLocaleString(),ref:f.ref,note:'Admin Credited',in:a,out:0,fee:0,bal:nb,type:f.type,slip:f.slip,chq:f.chq,tid:f.tid,seq:f.seq,bank:f.bank}); db.ref('accounts/'+k).update({balance:nb,tx:tx}).then(()=>{alert('IN Added '+a+' | Ref '+f.ref);load(); document.getElementById('mamt').value='';}); });
 }
-function show(s){['dashSec','createSec','moneySec','listSec','stmtSec','revSec','editSec'].forEach(id=>document.getElementById(id).classList.add('hidden')); document.getElementById(s+'Sec').classList.remove('hidden'); if(s==='dash'||s==='list') loadAll();}
-async function doLogin(){let a=document.getElementById('f1').value.trim().toLowerCase(),p=document.getElementById('f2').value.trim(); if(a==='admin'&&(p==='1234'||p==='12345')){document.getElementById('loginCard').classList.add('hidden'); document.getElementById('adminCard').classList.remove('hidden'); await loadAll();} else alert('Wrong PIN');}
-async function createCust(){
-  let khata=to9(document.getElementById('newKhata').value); let name=document.getElementById('newName').value.trim();
-  if(!khata||!name){alert('Enter Khata + Name');return;}
-  let ex=await getOne(khata); if(ex){alert('Khata already exists in Cloud');return;}
-  let c={khata:khata,name:name,father:document.getElementById('newFather').value.trim(),phone:document.getElementById('newPhone').value.trim(),cnic:document.getElementById('newCnic').value.trim(),address:document.getElementById('newAddr').value.trim(),pin:document.getElementById('newPin').value.trim()||'1234',bal:0,fees:0,tx:[]};
-  await putOne(c); document.getElementById('okA').innerText="Created "+khata+" in CLOUD"; await loadAll();
-  document.getElementById('newKhata').value=''; document.getElementById('newName').value='';
+function takeMoney(){
+ var k=document.getElementById('mkhata').value.trim(), a=parseInt(document.getElementById('outAmt').value); if(!k||!a){alert('Enter Khata + Amount');return;}
+ var title=document.getElementById('outTitle').value.trim()||'Unknown Title'; var ac=document.getElementById('outAcNo').value.trim()||'No AC No - '+Math.floor(10000000+Math.random()*89999999);
+ var t=document.querySelector('input[name="outType"]:checked'); var bank=document.getElementById('outBank').value; var ref=document.getElementById('outRef').value.trim()||('TX-'+Date.now().toString().slice(-8)); var tid=document.getElementById('outTid').value.trim();
+ db.ref('accounts/'+k).once('value',s=>{ var acc=s.val(); if(!acc){alert('Not found');return;} var nb=(acc.balance||0)-a; var tx=acc.tx||[]; tx.push({date:new Date().toLocaleString(),ref:ref,note:'Admin Debited',in:0,out:a,fee:0,bal:nb,type:t?t.value:'Bank Transfer',bank:bank,outTitle:title,outAc:ac,tid:tid}); db.ref('accounts/'+k).update({balance:nb,tx:tx}).then(()=>{alert('OUT Sent '+a+' to '+title+' | AC '+ac);load(); document.getElementById('outAmt').value='';}); });
 }
-async function doAdd(){
-  let k=to9(document.getElementById('mKhata').value), amt=Number(document.getElementById('mAmt').value), note=document.getElementById('mNote').value.trim();
-  let c=await getOne(k); if(!c){alert('Not found');return;} if(!amt){alert('Amount');return;}
-  c.bal+=amt; let ref='HQM-'+Date.now().toString().slice(-8); c.tx=c.tx||[]; c.tx.push({d:new Date().toLocaleString(),type:'ADD Ref:'+ref+' Note:'+note,amt:amt,fee:0});
-  await putOne(c); document.getElementById('okM').innerText="Added "+fmt(amt)+" to "+k+" - New Bal "+fmt(c.bal); await loadAll();
+function load(){ db.ref('accounts').once('value',s=>{ var d=s.val()||{}; var h=''; Object.keys(d).forEach(k=>{ var a=d[k]; h+='<div style="border-bottom:1px solid #334155;padding:10px 0"><b>'+k+' - '+a.name+' - PIN '+a.pin+'</b><br>Bal: '+(a.balance||0).toLocaleString()+' PKR Fees: '+(a.fees||0)+'<br><button class="blue" onclick="showStmt(\''+k+'\')">STATEMENT</button> <button class="red" onclick="delAcc(\''+k+'\')">DELETE</button></div>'; }); document.getElementById('list').innerHTML=h||'No accounts'; }); }
+function showStmt(k){
+ db.ref('accounts/'+k).once('value',s=>{ var a=s.val(); document.getElementById('stmtBox').style.display='block'; document.getElementById('stmtHead').innerText=a.name+' | Khata '+k;
+ var tx=a.tx||[]; var totIn=0, totOut=0; var h='';
+ tx.forEach((t,i)=>{ totIn+=(t.in||0); totOut+=(t.out||0);
+  var cls='tx-blue', badge='<span class="badge b-blue">TRANSFER</span>', label=t.note||'';
+  if((t.note||'').includes('Admin Credited')){cls='tx-green'; badge='<span class="badge b-green">ADMIN - CREDITED</span>'; label='Admin Credited - Green';}
+  if((t.note||'').includes('Admin Debited')){cls='tx-red'; badge='<span class="badge b-red">ADMIN - DEBITED</span>'; label='Admin Debited - Red';}
+  if((t.note||'').includes('Sent to')){cls='tx-red'; badge='<span class="badge b-red">TRANSFER OUT</span>'; label='From Khata Transfer - '+t.note;}
+  if((t.note||'').includes('Received from')){cls='tx-green'; badge='<span class="badge b-green">TRANSFER IN</span>'; label='From Khata Transfer - '+t.note;}
+  var extra=''; if(t.slip) extra+=' Slip: '+t.slip; if(t.chq) extra+=' Chq: '+t.chq; if(t.tid) extra+=' TID: '+t.tid; if(t.seq) extra+=' SEQ: '+t.seq; if(t.bank) extra+=' Bank: '+t.bank; if(t.type) extra+=' | '+t.type; if(t.outTitle) extra+='<br>To: '+t.outTitle+' | AC No: '+t.outAc;
+  h+='<div class="tx '+cls+'"><b>#'+(i+1)+' '+badge+'</b> '+label+'<br><span class="small">'+(t.date||'')+' | Ref: '+(t.ref||'TX-OLD')+extra+'</span><br><b style="color:#22c55e">IN: '+(t.in||0).toLocaleString()+'</b> &nbsp; <b style="color:#ef4444">OUT: '+(t.out||0).toLocaleString()+'</b> &nbsp; <b>Bal: '+(t.bal||0).toLocaleString()+'</b></div>';
+ });
+ document.getElementById('stmtList').innerHTML=h||'No transactions';
+ document.getElementById('totIn').innerText='+'+totIn.toLocaleString(); document.getElementById('totOut').innerText='-'+totOut.toLocaleString(); document.getElementById('finalBal').innerText=(a.balance||0).toLocaleString()+' PKR';
+ });
 }
-async function doOut(){
-  let k=to9(document.getElementById('mKhata').value), amt=Number(document.getElementById('mAmt').value), note=document.getElementById('mNote').value.trim();
-  let c=await getOne(k); if(!c){alert('Not found');return;} if(!amt){alert('Amount');return;}
-  let fee=calcFee(amt), total=amt+fee; if(c.bal<total){alert('Insufficient. Need '+fmt(total));return;}
-  c.bal-=total; c.fees=(c.fees||0)+fee; let ref='HQM-'+Date.now().toString().slice(-8); c.tx=c.tx||[]; c.tx.push({d:new Date().toLocaleString(),type:'ADMIN OUT Ref:'+ref+' Note:'+note,amt:amt,fee:fee,total:total});
-  await putOne(c); document.getElementById('okM').innerText="Sent "+fmt(amt)+" Fee "+fmt(fee)+" New Bal "+fmt(c.bal); await loadAll();
-}
-async function showStmt(){
-  let k=to9(document.getElementById('sKhata').value); let c=await getOne(k); if(!c){alert('Not found');return;}
-  let bal=c.bal; let html="<b>"+c.name+" ("+c.khata+")</b><br>Balance: <b>"+fmt(bal)+" PKR</b><hr>";
-  (c.tx||[]).slice().reverse().forEach(t=>{html+="<div>"+t.d+" - "+t.type+" - "+fmt(t.amt)+" PKR Fee "+fmt(t.fee||0)+"</div>";});
-  document.getElementById('stmtOut').innerHTML=html;
-}
-function viewStmt(k){document.getElementById('sKhata').value=k; show('stmt'); showStmt();}
-async function delCust(k){if(!confirm('Delete '+k+' from CLOUD?'))return; await delOne(k); await loadAll();}
-function editLoad(k){let c=ALL.find(x=>x.khata===k); if(!c)return; document.getElementById('eKhata').value=c.khata; document.getElementById('eName').value=c.name; document.getElementById('ePhone').value=c.phone||''; document.getElementById('ePin').value=c.pin; document.getElementById('eBal').value=c.bal; show('edit');}
-async function saveEdit(){
-  let k=to9(document.getElementById('eKhata').value); let c=await getOne(k); if(!c){alert('Not found');return;}
-  c.name=document.getElementById('eName').value.trim()||c.name; c.phone=document.getElementById('ePhone').value.trim();
-  let np=document.getElementById('ePin').value.trim(); if(np)c.pin=np;
-  let nb=document.getElementById('eBal').value.trim(); if(nb!=='')c.bal=Number(nb);
-  await putOne(c); document.getElementById('okE').innerText="Saved "+k+" to Cloud"; await loadAll();
-}
-async function doReverse(){
-  let k=to9(document.getElementById('rKhata').value), ref=document.getElementById('rRef').value.trim();
-  let c=await getOne(k); if(!c){alert('Not found');return;}
-  let found=(c.tx||[]).find(t=>String(t.type).includes(ref)); if(!found){alert('Ref not found');return;}
-  if((c.tx||[]).some(t=>String(t.type).includes('Reversal of')&&String(t.type).includes(ref))){alert('Already reversed');return;}
-  let isOut=/OUT|ADMIN/.test(found.type.toUpperCase());
-  if(isOut){c.bal+=Number(found.total||found.amt); if(found.fee)c.fees=Math.max(0,(c.fees||0)-Number(found.fee)); c.tx.push({d:new Date().toLocaleString(),type:'REVERSED IN Ref:'+ref+' Note:Reversal of OUT '+fmt(found.amt),amt:found.amt,fee:-Number(found.fee||0)});}
-  else{c.bal-=Number(found.amt); c.tx.push({d:new Date().toLocaleString(),type:'REVERSED OUT Ref:'+ref+' Note:Reversal of IN '+fmt(found.amt),amt:found.amt,fee:0});}
-  await putOne(c); document.getElementById('revOut').innerText="Reversed OK. New Bal "+fmt(c.bal); await loadAll();
-}
-loadAll();
+function delAcc(k){ if(confirm('Delete '+k+'?')){ db.ref('accounts/'+k).remove().then(load); } }
 </script></body></html>

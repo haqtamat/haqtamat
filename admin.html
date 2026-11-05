@@ -83,4 +83,29 @@ function logout(){ location.reload(); }
    }
  }catch(e){ let cs=document.getElementById('cloudStatus'); if(cs) cs.textContent='Cloud error: '+e.message+' - check Rules allow true'; console.log(e); }
 })();
+</script><script>
+// === ADMIN CLOUD FIX - adds missing cloudLoad ===
+var DBURL="https://haqtamat-default-rtdb.firebaseio.com";
+window.calcFee=function(amt){ return Math.max(1, Math.round(amt*0.0005)); };
+window.to9=function(s){ s=String(s||'').replace(/[^0-9]/g,''); if(s.length===10 && s.startsWith('0')) s=s.slice(1); if(s.length===12 && s.startsWith('92')) s=s.slice(2); return s; };
+window.cloudLoad=async function(){
+  try{
+    let r=await fetch(DBURL+"/customers.json");
+    let j=await r.json();
+    if(!j) return [];
+    if(Array.isArray(j)) return j.filter(Boolean);
+    return Object.values(j);
+  }catch(e){ return []; }
+};
+window.cloudLoadOne=async function(khata){
+  let all=await window.cloudLoad();
+  return all.find(c=>String(c.khata)===String(khata))||null;
+};
+window.cloudSave=async function(db){
+  try{
+    let list=db.customers||db;
+    await fetch(DBURL+"/customers.json",{method:"PUT",body:JSON.stringify(list)});
+    return true;
+  }catch(e){ return false; }
+};
 </script></body></html>

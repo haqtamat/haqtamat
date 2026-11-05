@@ -1,58 +1,99 @@
 <!DOCTYPE html>
-<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Haqtamat Customer - Cloud Only</title>
-<style>body{font-family:sans-serif;background:#0f172a;color:#fff;padding:15px} .card{background:#1e293b;padding:15px;border-radius:12px;max-width:500px;margin:10px auto} input{width:100%;padding:11px;margin:6px 0;border-radius:8px;border:none;font-size:15px;box-sizing:border-box} button{width:100%;padding:12px;background:#22c55e;color:#fff;border:none;border-radius:8px;font-size:15px;cursor:pointer;margin:5px 0} .red{background:#dc2626}.blue{background:#2563eb}.light{background:#334155} .hidden{display:none}</style>
-</head><body>
-<div class="card" id="loginCard"><h2>HAQTAMAT SARAFI</h2><p>Customer Login - CLOUD ONLY</p><div id="status">Connecting...</div>
-<input id="c1" placeholder="Account e.g. 123001001" inputmode="numeric"><input id="c2" type="password" placeholder="PIN" inputmode="numeric"><button onclick="doLogin()">LOGIN</button><div id="errC"></div></div>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Haqtamat - Admin</title>
+<style>
+body{font-family:system-ui;background:#0f172a;color:#fff;margin:0;padding:14px}
+.card{background:#1e293b;border-radius:14px;padding:14px;margin:10px 0}
+input,button,select{width:100%;padding:12px;border-radius:10px;border:0;margin:6px 0;font-size:15px;box-sizing:border-box}
+input,select{background:#0f172a;color:#fff;border:1px solid #334155}
+button{background:#22c55e;color:#000;font-weight:700}
+.blue{background:#3b82f6;color:#fff} .red{background:#ef4444;color:#fff} .orange{background:#f59e0b;color:#000}
+.row{display:flex;gap:8px} .row>div{flex:1}
+.tick{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+.tick label{background:#0f172a;border:1px solid #334155;padding:8px 12px;border-radius:20px;font-size:13px;cursor:pointer;display:flex;gap:6px;align-items:center}
+.tick input{width:auto;margin:0}
+.tx{padding:8px 10px;margin:0;border-bottom:1px solid #334155;font-size:13px;line-height:1.4}
+.tx-green{border-left:5px solid #22c55e} .tx-red{border-left:5px solid #ef4444} .tx-blue{border-left:5px solid #3b82f6}
+.small{font-size:11px;color:#cbd5e1}
+.big-in{color:#22c55e;font-size:24px;font-weight:800} .big-out{color:#ef4444;font-size:24px;font-weight:800} .big-bal{color:#facc15;font-size:26px;font-weight:900}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700}
+.b-green{background:#22c55e;color:#000} .b-red{background:#ef4444;color:#fff} .b-blue{background:#3b82f6;color:#fff}
+@media print{body{background:#fff;color:#000} .no-print{display:none} .card{background:#fff;border:1px solid #000} .small{color:#333}}
+</style></head>
+<body>
+<h2>Admin Dashboard - CLOUD</h2>
+<div class="card no-print" id="loginBox"><input id="apin" placeholder="Admin PIN" type="password"><button onclick="alogin()">Login Admin</button></div>
+<div id="app" style="display:none">
 
-<div class="card hidden" id="custCard"><h2 id="custName"></h2><h1 id="custBal"></h1><p id="custKhata"></p>
-<input id="toKhata" placeholder="To Account" inputmode="numeric"><input id="trAmt" placeholder="Amount PKR" type="number"><input id="trNote" placeholder="Note">
-<button onclick="doTransfer()">SEND - 0.05% Fee</button><div id="feePreview">Enter amount to see fee</div>
-<button class="blue" onclick="showStmt()">SHOW MY STATEMENT</button><button class="light" onclick="doChangePin()">CHANGE PIN</button><input id="newPinC" placeholder="New PIN" inputmode="numeric">
-<div id="stmtOut"></div><button class="red" onclick="location.reload()">LOGOUT</button></div>
+<div class="card no-print"><h3>Create Khata</h3><input id="nkhata" placeholder="Khata Number"><input id="nname" placeholder="Name"><input id="npin" placeholder="PIN"><button onclick="createAcc()">Create</button></div>
 
+<div class="card no-print"><h3>Money - ADD / TAKE</h3>
+<input id="mkhata" placeholder="Khata Number">
+<div class="tick">
+<label><input type="radio" name="payType" value="Cash" checked> ✅ Cash</label>
+<label><input type="radio" name="payType" value="Bank Transfer"> ✅ Bank Transfer</label>
+<label><input type="radio" name="payType" value="Cheque"> ✅ Cheque</label>
+<label><input type="radio" name="payType" value="Online / JazzCash / Easypaisa"> ✅ Online</label>
+</div>
+<div class="row"><div><label class="small">Slip No:</label><input id="slipNo" placeholder="Slip No"></div><div><label class="small">Ref No:</label><input id="refNo" placeholder="Ref No"></div></div>
+<div class="row"><div><label class="small">Chq No:</label><input id="chqNo" placeholder="Chq No"></div><div><label class="small">TID:</label><input id="tidNo" placeholder="TID"></div></div>
+<div class="row"><div><label class="small">SEQ No:</label><input id="seqNo" placeholder="SEQ No"></div><div><label class="small">Bank:</label><select id="bankName"><option value="">Select Bank</option><option>Cash</option><option>Meezan Bank</option><option>HBL</option><option>UBL</option><option>MCB</option><option>Alfalah</option><option>Bank Al Habib</option><option>JazzCash</option><option>Easypaisa</option><option>Other</option></select></div></div>
+<label class="small">Amount - Type Amount Here:</label>
+<input id="mamt" type="number" placeholder="Enter Amount e.g. 50000" style="font-size:22px;font-weight:800;border:2px solid #22c55e">
+<button onclick="addMoney()" style="font-size:18px">⬆ IN - ADD MONEY TO CUSTOMER</button>
+<button class="red" onclick="takeMoney()">⬇ OUT - TAKE MONEY FROM CUSTOMER</button>
+<p class="small">Tick one option above. Fill Slip / Ref / Chq / TID / SEQ / Bank if you have them. If Cash, leave Chq / TID empty.</p>
+</div>
+
+<div class="card"><h3>All Accounts</h3><div id="list"></div></div>
+
+<div class="card" id="stmtBox" style="display:none"><h3>Statement</h3><p id="stmtHead"></p>
+<div style="display:flex;gap:10px;text-align:center"><div style="flex:1;background:#14532d33;border-radius:10px;padding:10px"><div class="small">TOTAL IN</div><div class="big-in" id="totIn">0</div></div><div style="flex:1;background:#7f1d1d33;border-radius:10px;padding:10px"><div class="small">TOTAL OUT</div><div class="big-out" id="totOut">0</div></div></div>
+<div style="text-align:center;margin:8px 0"><div class="small">FINAL BALANCE</div><div class="big-bal" id="finalBal">0</div></div>
+<div id="stmtList"></div><button class="blue no-print" onclick="window.print()">Download PDF / Print Statement</button></div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 <script>
-const DB="https://haqtamat-default-rtdb.firebaseio.com";
-let CUR=null;
-function to9(s){s=String(s||'').replace(/[^0-9]/g,''); if(s.length===10&&s.startsWith('0'))s=s.slice(1); if(s.length===12&&s.startsWith('92'))s=s.slice(2); return s;}
-function fmt(n){return Number(n||0).toLocaleString('en-US')}
-function calcFee(a){return Math.max(1,Math.round(a*0.0005))}
-async function getOne(k){let r=await fetch(DB+"/"+to9(k)+".json"); return await r.json();}
-async function putOne(c){await fetch(DB+"/"+c.khata+".json",{method:"PUT",body:JSON.stringify(c)});}
-async function test(){try{let r=await fetch(DB+"/.json"); let j=await r.json(); document.getElementById('status').innerText="CLOUD CONNECTED - "+(j?Object.keys(j).length:0)+" accounts";}catch(e){document.getElementById('status').innerText="Cloud Error "+e.message;}}
-test();
-document.getElementById('trAmt').addEventListener('input',()=>{let a=Number(document.getElementById('trAmt').value); if(!a){document.getElementById('feePreview').innerText='Enter amount to see fee';return;} let f=calcFee(a); document.getElementById('feePreview').innerText='Amount '+fmt(a)+' + Fee '+fmt(f)+' = Deduct '+fmt(a+f);});
-async function doLogin(){
-  let a=to9(document.getElementById('c1').value), p=document.getElementById('c2').value.trim();
-  let c=await getOne(a); if(!c){document.getElementById('errC').innerText='Account not found in Cloud: '+a;return;}
-  if(String(c.pin)!==String(p)){document.getElementById('errC').innerText='Wrong PIN';return;}
-  CUR=c; document.getElementById('loginCard').classList.add('hidden'); document.getElementById('custCard').classList.remove('hidden');
-  document.getElementById('custName').innerText='Hello '+c.name; document.getElementById('custBal').innerText=fmt(c.bal)+' PKR'; document.getElementById('custKhata').innerText='Account: '+c.khata;
+var cfg={databaseURL:"https://haqtamat-default-rtdb.firebaseio.com"};
+firebase.initializeApp(cfg); var db=firebase.database();
+function alogin(){ if(document.getElementById('apin').value=='1234'){document.getElementById('loginBox').style.display='none';document.getElementById('app').style.display='block';load();} else alert('Wrong PIN'); }
+function createAcc(){ var k=document.getElementById('nkhata').value.trim(), n=document.getElementById('nname').value.trim(), p=document.getElementById('npin').value.trim(); if(!k||!n||!p){alert('Fill all');return;} db.ref('accounts/'+k).set({name:n,pin:p,balance:0,fees:0,tx:[]}).then(()=>{alert('Created');load();}); }
+function getForm(){
+ var t=document.querySelector('input[name="payType"]:checked');
+ return {type:t?t.value:'Cash', slip:document.getElementById('slipNo').value.trim(), ref:document.getElementById('refNo').value.trim()||('TX-'+Date.now().toString().slice(-8)), chq:document.getElementById('chqNo').value.trim(), tid:document.getElementById('tidNo').value.trim(), seq:document.getElementById('seqNo').value.trim(), bank:document.getElementById('bankName').value};
 }
-async function doTransfer(){
-  let to=to9(document.getElementById('toKhata').value), amt=Number(document.getElementById('trAmt').value), note=document.getElementById('trNote').value.trim();
-  if(!to||!amt){alert('Enter To + Amount');return;}
-  let sender=await getOne(CUR.khata); let dest=await getOne(to);
-  if(!dest){alert('To Account not found: '+to);return;} if(sender.khata===dest.khata){alert('Cannot send to self');return;}
-  let fee=calcFee(amt), total=amt+fee; if(sender.bal<total){alert('Need '+fmt(total)+' have '+fmt(sender.bal));return;}
-  sender.bal-=total; sender.fees=(sender.fees||0)+fee; dest.bal+=amt;
-  let ref='HQM-'+Date.now().toString().slice(-8), dt=new Date().toLocaleString();
-  sender.tx=sender.tx||[]; dest.tx=dest.tx||[];
-  sender.tx.push({d:dt,type:'OUT->'+dest.khata+' Ref:'+ref+' Note:'+note,amt:amt,fee:fee,total:total,to:dest.khata});
-  dest.tx.push({d:dt,type:'IN<-'+sender.khata+' Ref:'+ref+' Note:'+note,amt:amt,fee:0,from:sender.khata});
-  await putOne(sender); await putOne(dest); CUR=sender;
-  document.getElementById('custBal').innerText=fmt(CUR.bal)+' PKR';
-  alert('Sent '+fmt(amt)+' + Fee '+fmt(fee)+' = Deduct '+fmt(total)+' Ref '+ref);
+function addMoney(){
+ var k=document.getElementById('mkhata').value.trim(), a=parseInt(document.getElementById('mamt').value); if(!k||!a){alert('Enter Khata + Amount');return;}
+ var f=getForm();
+ db.ref('accounts/'+k).once('value',s=>{ var acc=s.val(); if(!acc){alert('Not found');return;} var nb=(acc.balance||0)+a; var tx=acc.tx||[];
+ tx.push({date:new Date().toLocaleString(),ref:f.ref,note:'Admin Credited',in:a,out:0,fee:0,bal:nb, type:f.type, slip:f.slip, chq:f.chq, tid:f.tid, seq:f.seq, bank:f.bank});
+ db.ref('accounts/'+k).update({balance:nb,tx:tx}).then(()=>{alert('IN Added '+a+' | Ref '+f.ref);load(); document.getElementById('mamt').value='';}); });
 }
-async function showStmt(){
-  let c=await getOne(CUR.khata); CUR=c; document.getElementById('custBal').innerText=fmt(c.bal)+' PKR';
-  let h="<b>Statement - "+c.name+"</b><br>Balance: <b>"+fmt(c.bal)+" PKR</b><hr>";
-  (c.tx||[]).slice().reverse().forEach(t=>{h+="<div>"+t.d+" - "+t.type+" - "+fmt(t.amt)+" Fee "+fmt(t.fee||0)+"</div>";});
-  document.getElementById('stmtOut').innerHTML=h;
+function takeMoney(){
+ var k=document.getElementById('mkhata').value.trim(), a=parseInt(document.getElementById('mamt').value); if(!k||!a){alert('Enter Khata + Amount');return;}
+ var f=getForm();
+ db.ref('accounts/'+k).once('value',s=>{ var acc=s.val(); if(!acc){alert('Not found');return;} var nb=(acc.balance||0)-a; var tx=acc.tx||[];
+ tx.push({date:new Date().toLocaleString(),ref:f.ref,note:'Admin Debited',in:0,out:a,fee:0,bal:nb, type:f.type, slip:f.slip, chq:f.chq, tid:f.tid, seq:f.seq, bank:f.bank});
+ db.ref('accounts/'+k).update({balance:nb,tx:tx}).then(()=>{alert('OUT Taken '+a+' | Ref '+f.ref);load(); document.getElementById('mamt').value='';}); });
 }
-async function doChangePin(){
-  let np=document.getElementById('newPinC').value.trim(); if(np.length<4){alert('PIN 4 digits');return;}
-  let c=await getOne(CUR.khata); c.pin=np; await putOne(c); CUR=c; alert('PIN Changed in Cloud to '+np);
+function load(){ db.ref('accounts').once('value',s=>{ var d=s.val()||{}; var h=''; Object.keys(d).forEach(k=>{ var a=d[k]; h+='<div style="border-bottom:1px solid #334155;padding:10px 0"><b>'+k+' - '+a.name+' - PIN '+a.pin+'</b><br>Bal: '+(a.balance||0).toLocaleString()+' PKR Fees: '+(a.fees||0)+'<br><button class="blue" onclick="showStmt(\''+k+'\')">STATEMENT</button> <button class="red" onclick="delAcc(\''+k+'\')">DELETE</button></div>'; }); document.getElementById('list').innerHTML=h||'No accounts'; }); }
+function showStmt(k){
+ db.ref('accounts/'+k).once('value',s=>{ var a=s.val(); document.getElementById('stmtBox').style.display='block'; document.getElementById('stmtHead').innerText=a.name+' | Khata '+k;
+ var tx=a.tx||[]; var totIn=0, totOut=0; var h='';
+ tx.forEach((t,i)=>{ totIn+=(t.in||0); totOut+=(t.out||0);
+  var cls='tx-blue', badge='<span class="badge b-blue">TRANSFER</span>', label=t.note||'';
+  if((t.note||'').includes('Admin Credited')){cls='tx-green'; badge='<span class="badge b-green">ADMIN - CREDITED</span>'; label='Admin Credited - Green';}
+  if((t.note||'').includes('Admin Debited')){cls='tx-red'; badge='<span class="badge b-red">ADMIN - DEBITED</span>'; label='Admin Debited - Red';}
+  if((t.note||'').includes('Sent to')){cls='tx-red'; badge='<span class="badge b-red">TRANSFER OUT</span>'; label='From Khata Transfer - '+t.note;}
+  if((t.note||'').includes('Received from')){cls='tx-green'; badge='<span class="badge b-green">TRANSFER IN</span>'; label='From Khata Transfer - '+t.note;}
+  var extra=''; if(t.slip) extra+=' Slip: '+t.slip; if(t.chq) extra+=' Chq: '+t.chq; if(t.tid) extra+=' TID: '+t.tid; if(t.seq) extra+=' SEQ: '+t.seq; if(t.bank) extra+=' Bank: '+t.bank; if(t.type) extra+=' | '+t.type;
+  h+='<div class="tx '+cls+'"><b>#'+(i+1)+' '+badge+'</b> '+label+'<br><span class="small">'+(t.date||'')+' | Ref: '+(t.ref||'TX-OLD')+extra+'</span><br><b style="color:#22c55e">IN: '+(t.in||0).toLocaleString()+'</b> &nbsp; <b style="color:#ef4444">OUT: '+(t.out||0).toLocaleString()+'</b> &nbsp; <b>Bal: '+(t.bal||0).toLocaleString()+'</b></div>';
+ });
+ document.getElementById('stmtList').innerHTML=h||'No transactions';
+ document.getElementById('totIn').innerText='+'+totIn.toLocaleString(); document.getElementById('totOut').innerText='-'+totOut.toLocaleString(); document.getElementById('finalBal').innerText=(a.balance||0).toLocaleString()+' PKR';
+ });
 }
+function delAcc(k){ if(confirm('Delete '+k+'?')){ db.ref('accounts/'+k).remove().then(load); } }
 </script></body></html>

@@ -108,4 +108,13 @@ window.cloudSave=async function(db){
     return true;
   }catch(e){ return false; }
 };
+</script><script>
+// === RETRY - check cloud again after fix loads ===
+setTimeout(async()=>{
+  try{
+    let d = await window.cloudLoad();
+    let els = [...document.querySelectorAll('*')].filter(e=>e.textContent.includes('Cloud error'));
+    els.forEach(e=>{ e.textContent='Cloud Connected - '+d.length+' customers'; e.style.color='green'; });
+  }catch(e){}
+},800);
 </script></body></html>

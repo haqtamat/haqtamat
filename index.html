@@ -1,99 +1,105 @@
 <!DOCTYPE html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Haqtamat - Admin</title>
+<title>Haqtamat - Customer</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 body{font-family:system-ui;background:#0f172a;color:#fff;margin:0;padding:14px}
 .card{background:#1e293b;border-radius:14px;padding:14px;margin:10px 0}
-input,button,select{width:100%;padding:12px;border-radius:10px;border:0;margin:6px 0;font-size:15px;box-sizing:border-box}
-input,select{background:#0f172a;color:#fff;border:1px solid #334155}
+input,button{width:100%;padding:12px;border-radius:10px;border:0;margin:6px 0;font-size:16px;box-sizing:border-box}
+input{background:#0f172a;color:#fff;border:1px solid #334155}
 button{background:#22c55e;color:#000;font-weight:700}
 .blue{background:#3b82f6;color:#fff} .red{background:#ef4444;color:#fff} .orange{background:#f59e0b;color:#000}
-.row{display:flex;gap:8px} .row>div{flex:1}
-.tick{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
-.tick label{background:#0f172a;border:1px solid #334155;padding:8px 12px;border-radius:20px;font-size:13px;cursor:pointer;display:flex;gap:6px;align-items:center}
-.tick input{width:auto;margin:0}
 .tx{padding:8px 10px;margin:0;border-bottom:1px solid #334155;font-size:13px;line-height:1.4}
-.tx-green{border-left:5px solid #22c55e} .tx-red{border-left:5px solid #ef4444} .tx-blue{border-left:5px solid #3b82f6}
+.tx-green{border-left:5px solid #22c55e;background:#14532d22}
+.tx-red{border-left:5px solid #ef4444;background:#7f1d1d22}
+.tx-blue{border-left:5px solid #3b82f6;background:#1e3a8a22}
 .small{font-size:11px;color:#cbd5e1}
-.big-in{color:#22c55e;font-size:24px;font-weight:800} .big-out{color:#ef4444;font-size:24px;font-weight:800} .big-bal{color:#facc15;font-size:26px;font-weight:900}
+.big-in{color:#22c55e;font-size:26px;font-weight:800}
+.big-out{color:#ef4444;font-size:26px;font-weight:800}
+.big-bal{color:#facc15;font-size:30px;font-weight:900}
 .badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700}
 .b-green{background:#22c55e;color:#000} .b-red{background:#ef4444;color:#fff} .b-blue{background:#3b82f6;color:#fff}
-@media print{body{background:#fff;color:#000} .no-print{display:none} .card{background:#fff;border:1px solid #000} .small{color:#333}}
+@media print{body{background:#fff;color:#000} .no-print{display:none} .card{background:#fff;border:1px solid #000} .tx{border-bottom:1px solid #ccc} .small{color:#333} }
 </style></head>
 <body>
-<h2>Admin Dashboard - CLOUD</h2>
-<div class="card no-print" id="loginBox"><input id="apin" placeholder="Admin PIN" type="password"><button onclick="alogin()">Login Admin</button></div>
+<h2>HAQTAMAT - Customer Khata</h2>
+<div class="card no-print" id="loginBox"><input id="khata" placeholder="Khata Number"><input id="pin" placeholder="PIN" type="password"><button onclick="login()">Login</button></div>
 <div id="app" style="display:none">
-
-<div class="card no-print"><h3>Create Khata</h3><input id="nkhata" placeholder="Khata Number"><input id="nname" placeholder="Name"><input id="npin" placeholder="PIN"><button onclick="createAcc()">Create</button></div>
-
-<div class="card no-print"><h3>Money - ADD / TAKE</h3>
-<input id="mkhata" placeholder="Khata Number">
-<div class="tick">
-<label><input type="radio" name="payType" value="Cash" checked> ✅ Cash</label>
-<label><input type="radio" name="payType" value="Bank Transfer"> ✅ Bank Transfer</label>
-<label><input type="radio" name="payType" value="Cheque"> ✅ Cheque</label>
-<label><input type="radio" name="payType" value="Online / JazzCash / Easypaisa"> ✅ Online</label>
-</div>
-<div class="row"><div><label class="small">Slip No:</label><input id="slipNo" placeholder="Slip No"></div><div><label class="small">Ref No:</label><input id="refNo" placeholder="Ref No"></div></div>
-<div class="row"><div><label class="small">Chq No:</label><input id="chqNo" placeholder="Chq No"></div><div><label class="small">TID:</label><input id="tidNo" placeholder="TID"></div></div>
-<div class="row"><div><label class="small">SEQ No:</label><input id="seqNo" placeholder="SEQ No"></div><div><label class="small">Bank:</label><select id="bankName"><option value="">Select Bank</option><option>Cash</option><option>Meezan Bank</option><option>HBL</option><option>UBL</option><option>MCB</option><option>Alfalah</option><option>Bank Al Habib</option><option>JazzCash</option><option>Easypaisa</option><option>Other</option></select></div></div>
-<label class="small">Amount - Type Amount Here:</label>
-<input id="mamt" type="number" placeholder="Enter Amount e.g. 50000" style="font-size:22px;font-weight:800;border:2px solid #22c55e">
-<button onclick="addMoney()" style="font-size:18px">⬆ IN - ADD MONEY TO CUSTOMER</button>
-<button class="red" onclick="takeMoney()">⬇ OUT - TAKE MONEY FROM CUSTOMER</button>
-<p class="small">Tick one option above. Fill Slip / Ref / Chq / TID / SEQ / Bank if you have them. If Cash, leave Chq / TID empty.</p>
-</div>
-
-<div class="card"><h3>All Accounts</h3><div id="list"></div></div>
-
-<div class="card" id="stmtBox" style="display:none"><h3>Statement</h3><p id="stmtHead"></p>
+<div class="card"><h3 id="cName"></h3><p id="cInfo"></p><div class="big-bal" id="cBal"></div><p id="cFees"></p><button class="blue no-print" onclick="showStmt()">My Statement</button></div>
+<div class="card no-print"><h3>Send Money</h3><input id="toKhata" placeholder="To Khata Number"><input id="amt" type="number" placeholder="Amount"><button onclick="sendMoney()">Send - Fee 5 PKR</button><div id="receipt"></div></div>
+<div class="card" id="stmtBox" style="display:none">
+<h3>Statement - Haqtamat</h3><p id="stmtHead"></p>
 <div style="display:flex;gap:10px;text-align:center"><div style="flex:1;background:#14532d33;border-radius:10px;padding:10px"><div class="small">TOTAL IN</div><div class="big-in" id="totIn">0</div></div><div style="flex:1;background:#7f1d1d33;border-radius:10px;padding:10px"><div class="small">TOTAL OUT</div><div class="big-out" id="totOut">0</div></div></div>
 <div style="text-align:center;margin:8px 0"><div class="small">FINAL BALANCE</div><div class="big-bal" id="finalBal">0</div></div>
-<div id="stmtList"></div><button class="blue no-print" onclick="window.print()">Download PDF / Print Statement</button></div>
+<div id="stmtList" style="margin-top:4px"></div>
+<button class="blue no-print" onclick="window.print()">Download PDF / Print Statement</button><button class="no-print" onclick="logout()">Logout</button>
 </div>
-
+</div>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 <script>
 var cfg={databaseURL:"https://haqtamat-default-rtdb.firebaseio.com"};
 firebase.initializeApp(cfg); var db=firebase.database();
-function alogin(){ if(document.getElementById('apin').value=='1234'){document.getElementById('loginBox').style.display='none';document.getElementById('app').style.display='block';load();} else alert('Wrong PIN'); }
-function createAcc(){ var k=document.getElementById('nkhata').value.trim(), n=document.getElementById('nname').value.trim(), p=document.getElementById('npin').value.trim(); if(!k||!n||!p){alert('Fill all');return;} db.ref('accounts/'+k).set({name:n,pin:p,balance:0,fees:0,tx:[]}).then(()=>{alert('Created');load();}); }
-function getForm(){
- var t=document.querySelector('input[name="payType"]:checked');
- return {type:t?t.value:'Cash', slip:document.getElementById('slipNo').value.trim(), ref:document.getElementById('refNo').value.trim()||('TX-'+Date.now().toString().slice(-8)), chq:document.getElementById('chqNo').value.trim(), tid:document.getElementById('tidNo').value.trim(), seq:document.getElementById('seqNo').value.trim(), bank:document.getElementById('bankName').value};
+var cur=null,curKhata="";
+function refNo(){ return 'TX-'+Date.now().toString().slice(-8)+'-'+Math.floor(100+Math.random()*900); }
+function login(){
+ var k=document.getElementById('khata').value.trim(), p=document.getElementById('pin').value.trim();
+ db.ref('accounts/'+k).once('value',s=>{ var a=s.val(); if(!a){alert('Khata not found');return;} if(String(a.pin)!==p){alert('Wrong PIN');return;} cur=a; curKhata=k; document.getElementById('loginBox').style.display='none'; document.getElementById('app').style.display='block'; render(); });
 }
-function addMoney(){
- var k=document.getElementById('mkhata').value.trim(), a=parseInt(document.getElementById('mamt').value); if(!k||!a){alert('Enter Khata + Amount');return;}
- var f=getForm();
- db.ref('accounts/'+k).once('value',s=>{ var acc=s.val(); if(!acc){alert('Not found');return;} var nb=(acc.balance||0)+a; var tx=acc.tx||[];
- tx.push({date:new Date().toLocaleString(),ref:f.ref,note:'Admin Credited',in:a,out:0,fee:0,bal:nb, type:f.type, slip:f.slip, chq:f.chq, tid:f.tid, seq:f.seq, bank:f.bank});
- db.ref('accounts/'+k).update({balance:nb,tx:tx}).then(()=>{alert('IN Added '+a+' | Ref '+f.ref);load(); document.getElementById('mamt').value='';}); });
+function render(){
+ document.getElementById('cName').innerText=cur.name;
+ document.getElementById('cInfo').innerText='Khata: '+curKhata+' | PIN: '+cur.pin;
+ document.getElementById('cBal').innerText='Bal: '+(cur.balance||0).toLocaleString()+' PKR';
+ document.getElementById('cFees').innerText='Total Fees Paid: '+(cur.fees||0)+' PKR';
 }
-function takeMoney(){
- var k=document.getElementById('mkhata').value.trim(), a=parseInt(document.getElementById('mamt').value); if(!k||!a){alert('Enter Khata + Amount');return;}
- var f=getForm();
- db.ref('accounts/'+k).once('value',s=>{ var acc=s.val(); if(!acc){alert('Not found');return;} var nb=(acc.balance||0)-a; var tx=acc.tx||[];
- tx.push({date:new Date().toLocaleString(),ref:f.ref,note:'Admin Debited',in:0,out:a,fee:0,bal:nb, type:f.type, slip:f.slip, chq:f.chq, tid:f.tid, seq:f.seq, bank:f.bank});
- db.ref('accounts/'+k).update({balance:nb,tx:tx}).then(()=>{alert('OUT Taken '+a+' | Ref '+f.ref);load(); document.getElementById('mamt').value='';}); });
-}
-function load(){ db.ref('accounts').once('value',s=>{ var d=s.val()||{}; var h=''; Object.keys(d).forEach(k=>{ var a=d[k]; h+='<div style="border-bottom:1px solid #334155;padding:10px 0"><b>'+k+' - '+a.name+' - PIN '+a.pin+'</b><br>Bal: '+(a.balance||0).toLocaleString()+' PKR Fees: '+(a.fees||0)+'<br><button class="blue" onclick="showStmt(\''+k+'\')">STATEMENT</button> <button class="red" onclick="delAcc(\''+k+'\')">DELETE</button></div>'; }); document.getElementById('list').innerHTML=h||'No accounts'; }); }
-function showStmt(k){
- db.ref('accounts/'+k).once('value',s=>{ var a=s.val(); document.getElementById('stmtBox').style.display='block'; document.getElementById('stmtHead').innerText=a.name+' | Khata '+k;
- var tx=a.tx||[]; var totIn=0, totOut=0; var h='';
- tx.forEach((t,i)=>{ totIn+=(t.in||0); totOut+=(t.out||0);
-  var cls='tx-blue', badge='<span class="badge b-blue">TRANSFER</span>', label=t.note||'';
-  if((t.note||'').includes('Admin Credited')){cls='tx-green'; badge='<span class="badge b-green">ADMIN - CREDITED</span>'; label='Admin Credited - Green';}
-  if((t.note||'').includes('Admin Debited')){cls='tx-red'; badge='<span class="badge b-red">ADMIN - DEBITED</span>'; label='Admin Debited - Red';}
-  if((t.note||'').includes('Sent to')){cls='tx-red'; badge='<span class="badge b-red">TRANSFER OUT</span>'; label='From Khata Transfer - '+t.note;}
-  if((t.note||'').includes('Received from')){cls='tx-green'; badge='<span class="badge b-green">TRANSFER IN</span>'; label='From Khata Transfer - '+t.note;}
-  var extra=''; if(t.slip) extra+=' Slip: '+t.slip; if(t.chq) extra+=' Chq: '+t.chq; if(t.tid) extra+=' TID: '+t.tid; if(t.seq) extra+=' SEQ: '+t.seq; if(t.bank) extra+=' Bank: '+t.bank; if(t.type) extra+=' | '+t.type;
-  h+='<div class="tx '+cls+'"><b>#'+(i+1)+' '+badge+'</b> '+label+'<br><span class="small">'+(t.date||'')+' | Ref: '+(t.ref||'TX-OLD')+extra+'</span><br><b style="color:#22c55e">IN: '+(t.in||0).toLocaleString()+'</b> &nbsp; <b style="color:#ef4444">OUT: '+(t.out||0).toLocaleString()+'</b> &nbsp; <b>Bal: '+(t.bal||0).toLocaleString()+'</b></div>';
+function showStmt(){
+ document.getElementById('stmtBox').style.display='block';
+ document.getElementById('stmtHead').innerText=cur.name+' | Khata '+curKhata;
+ var tx=cur.tx||cur.transactions||[];
+ var totIn=0, totOut=0; var h='';
+ tx.forEach((t,i)=>{
+   var inn=t.in||0, out=t.out||0; totIn+=inn; totOut+=out;
+   var cls='tx-blue', badge='<span class="badge b-blue">TRANSFER</span>', label=t.note||t.type||'Transfer';
+   if((t.note||'').includes('Admin ADD')||(t.note||'').includes('Admin Credited')){ cls='tx-green'; badge='<span class="badge b-green">ADMIN - CREDITED</span>'; label='Admin Credited - Green'; }
+   if((t.note||'').includes('Admin TAKE')||(t.note||'').includes('Admin Debited')){ cls='tx-red'; badge='<span class="badge b-red">ADMIN - DEBITED</span>'; label='Admin Debited - Red'; }
+   if((t.note||'').includes('Sent to')){ cls='tx-red'; badge='<span class="badge b-red">TRANSFER OUT</span>'; label='From Khata Transfer - Sent to '+t.note.replace('Sent to ',''); }
+   if((t.note||'').includes('Received from')){ cls='tx-green'; badge='<span class="badge b-green">TRANSFER IN</span>'; label='From Khata Transfer - Received from '+t.note.replace('Received from ',''); }
+   h+='<div class="tx '+cls+'"><b>#'+(i+1)+' '+badge+'</b> '+label+'<br><span class="small">'+(t.date||'')+' | Ref: '+(t.ref||'TX-OLD')+'</span><br><b style="color:#22c55e">IN: '+inn.toLocaleString()+'</b> &nbsp; <b style="color:#ef4444">OUT: '+out.toLocaleString()+'</b> &nbsp; Fee: '+(t.fee||0)+' &nbsp; <b>Bal: '+(t.bal||0).toLocaleString()+'</b></div>';
  });
- document.getElementById('stmtList').innerHTML=h||'No transactions';
- document.getElementById('totIn').innerText='+'+totIn.toLocaleString(); document.getElementById('totOut').innerText='-'+totOut.toLocaleString(); document.getElementById('finalBal').innerText=(a.balance||0).toLocaleString()+' PKR';
+ document.getElementById('stmtList').innerHTML=h||'No transactions yet';
+ document.getElementById('totIn').innerText='+'+totIn.toLocaleString();
+ document.getElementById('totOut').innerText='-'+totOut.toLocaleString();
+ document.getElementById('finalBal').innerText=(cur.balance||0).toLocaleString()+' PKR';
+}
+function sendMoney(){
+ var to=document.getElementById('toKhata').value.trim(), amt=parseInt(document.getElementById('amt').value);
+ if(!to||!amt){alert('Enter khata + amount');return;}
+ if((cur.balance||0) < amt+5){alert('Need amount + 5 fee');return;}
+ db.ref('accounts/'+to).once('value',s=>{
+  var r=s.val(); if(!r){alert('Receiver not found');return;}
+  var date=new Date().toLocaleString(); var ref=refNo();
+  var newBal=(cur.balance||0)-amt-5; var rBal=(r.balance||0)+amt;
+  var tx1={date:date,ref:ref,note:'Sent to '+to+' ('+r.name+')',in:0,out:amt,fee:5,bal:newBal};
+  var tx2={date:date,ref:ref,note:'Received from '+curKhata+' ('+cur.name+')',in:amt,out:0,fee:0,bal:rBal};
+  var curTx=cur.tx||[]; curTx.push(tx1); var rTx=r.tx||[]; rTx.push(tx2);
+  db.ref('accounts/'+curKhata).update({balance:newBal,fees:(cur.fees||0)+5,tx:curTx});
+  db.ref('accounts/'+to).update({balance:rBal,tx:rTx});
+  cur.balance=newBal; cur.fees=(cur.fees||0)+5; cur.tx=curTx; render(); showStmt();
+  document.getElementById('receipt').innerHTML='<div class="card" id="receiptCard" style="background:#fff;color:#000"><h3 style="margin:0">HAQTAMAT - RECEIPT</h3><p style="font-size:12px">Ref: '+ref+'<br>Date: '+date+'</p><hr><p>From: '+cur.name+' ('+curKhata+')<br>To: '+r.name+' ('+to+')<br><b style="color:#22c55e">IN / OUT:</b> Sent '+amt.toLocaleString()+' PKR<br>Fee: 5 PKR<br><b>New Balance: '+newBal.toLocaleString()+' PKR</b></p><p style="font-size:11px">Thank you - Haqtamat</p></div><button class="blue" onclick="window.print()">Download Receipt PDF</button><button style="background:#25D366" onclick="shareImage()">Share Receipt as IMAGE</button><button class="orange" onclick="shareText(\''+ref+'\',\''+r.name+'\',\''+to+'\','+amt+','+newBal+',\''+date+'\')">Share Receipt on WhatsApp (Text)</button>';
  });
 }
-function delAcc(k){ if(confirm('Delete '+k+'?')){ db.ref('accounts/'+k).remove().then(load); } }
+function shareText(ref,rname,to,amt,newBal,date){
+ var txt='*HAQTAMAT RECEIPT*%0ARef: '+ref+'%0ADate: '+date+'%0AFrom: '+cur.name+' ('+curKhata+')%0ATo: '+rname+' ('+to+')%0AAmount: '+amt.toLocaleString()+' PKR%0AFee: 5 PKR%0ANew Balance: '+newBal.toLocaleString()+' PKR';
+ window.open('https://wa.me/?text='+txt,'_blank');
+}
+function shareImage(){
+ html2canvas(document.getElementById('receiptCard')).then(canvas=>{
+  canvas.toBlob(blob=>{
+   var file=new File([blob],'haqtamat-receipt.png',{type:'image/png'});
+   if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){ navigator.share({files:[file],title:'Haqtamat Receipt'}); }
+   else{ var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='haqtamat-receipt.png'; a.click(); alert('Receipt image downloaded - now send it on WhatsApp'); }
+  });
+ });
+}
+function logout(){location.reload();}
 </script></body></html>

@@ -56,7 +56,37 @@ function filterByDate(){ let f=document.getElementById('fromDate').value,t=docum
 function shareStatement(){ if(!CURSTAT.length){alert('Show statement first');return} let f=document.getElementById('fromDate').value||'All',t=document.getElementById('toDate').value||'All'; let txt='HAQTAMAT SARAFI - Statement - Oldest First\nName: '+CUR.name+'\nAccount: '+CUR.khata+'\nPeriod: '+f+' to '+t+'\nBalance: '+fmt(CUR.bal)+' PKR\n---\n'+CURSTAT.map((obj,i)=>{let p=parseStmt(obj.t,obj.bal); let plain=p.detail.replace(/<[^>]*>/g,''); let label=p.isAdmin?'Admin - ':p.isOut?'OUT - ':'IN + '; return (i+1)+'. '+label+fmt(obj.t.amt)+' PKR'+(obj.t.fee?' + Fee '+fmt(obj.t.fee):'')+'\n'+plain;}).join('\n\n'); window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');}
 function downloadStatementPDF(){ try{ const {jsPDF}=window.jspdf; let doc=new jsPDF('p','pt','a4'); let f=document.getElementById('fromDate').value||'All',t=document.getElementById('toDate').value||'All'; let left=14; let y=50; doc.setFont('helvetica','bold'); doc.setFontSize(18); doc.text('HAQTAMAT SARAFI',297.5,y,{align:'center'}); y+=18; doc.setFontSize(11); doc.setFont('helvetica','normal'); doc.text('Statement - '+CUR.name+' - Oldest First',297.5,y,{align:'center'}); y+=26; doc.setFontSize(10); doc.text('Account: '+CUR.khata+' | Balance: '+fmt(CUR.bal)+' PKR | Period: '+f+' to '+t,left,y); y+=18; doc.setDrawColor(200); doc.line(left,y,595-left,y); y+=14; CURSTAT.forEach((obj,i)=>{ if(y>750){doc.addPage(); y=30;} let p=parseStmt(obj.t,obj.bal); if(p.isOut){doc.setTextColor(220,38,38);} else {doc.setTextColor(22,163,74);} doc.setFont('helvetica','bold'); doc.setFontSize(11); let label=p.isAdmin?'Admin - ':p.isOut?'OUT - ':'IN + '; doc.text((i+1)+'. '+label+fmt(obj.t.amt)+' PKR'+(obj.t.fee?' + Fee '+fmt(obj.t.fee):''),left,y); y+=12; doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(0,0,0); let plain=p.detail.replace(/<[^>]*>/g,'');  let balanceText=`Balance: ${fmt(obj.bal)} PKR`; let detailOnly=plain.replace(balanceText,'').trim(); let lines=doc.splitTextToSize(detailOnly,560); lines.forEach(l=>{doc.text(l,left,y); y+=10;}); doc.setFont('helvetica','bold'); doc.text(balanceText,left,y); y+=14; }); doc.save('stmt-'+CUR.khata+'.pdf'); }catch(e){alert('PDF error '+e.message)} }
 function fullDetail(c,type){ return `<b>${type}</b><br>Name: ${c.name}<br>Account: ${c.khata}<br>Father: ${c.father||'-'}<br>Phone: ${c.phone||'-'}<br>CNIC: ${c.cnic||'-'}<br>Address: ${c.address||'-'}`; }
-function urduWords(n){ return n.toLocaleString()+' PKR'; }
+function urduWords(n){
+  n=Math.floor(Number(n)||0);
+  if(n===0) return "Zero Rupees Only";
+  const ones=["","Ek","Do","Teen","Chaar","Paanch","Che","Saat","Aath","Nau","Das","Gyarah","Barah","Terah","Chaudah","Pandrah","Solah","Satrah","Atharah","Unnis"];
+  const tens=["","","Bees","Tees","Chalees","Pachaas","Saath","Sattar","Assi","Nawwe"];
+  function two(d){
+    if(d<20) return ones[d];
+    let t=Math.floor(d/10), r=d%10;
+    return tens[t]+(r?" "+ones[r]:"");
+  }
+  function three(d){
+    let h=Math.floor(d/100), r=d%100, s="";
+    if(h) s+=ones[h]+" Sau";
+    if(r){ if(s) s+=" "; s+=two(r); }
+    return s;
+  }
+  let parts=[];
+  // Pakistani system: Kharab > Arab > Crore > Lakh > Hazaar
+  let kharab=Math.floor(n/100000000000); n%=100000000000;
+  let arab=Math.floor(n/1000000000); n%=1000000000;
+  let crore=Math.floor(n/10000000); n%=10000000;
+  let lakh=Math.floor(n/100000); n%=100000;
+  let hazar=Math.floor(n/1000); n%=1000;
+  if(kharab) parts.push(three(kharab)+" Kharab");
+  if(arab) parts.push(three(arab)+" Arab");
+  if(crore) parts.push(three(crore)+" Crore");
+  if(lakh) parts.push(three(lakh)+" Lakh");
+  if(hazar) parts.push(three(hazar)+" Hazaar");
+  if(n) parts.push(three(n));
+  return parts.join(" ")+" Rupees Only";
+}
 document.getElementById('trAmt')?.addEventListener('input',()=>{
   let amt=Number(document.getElementById('trAmt').value);
   let preview=document.getElementById('feePreview');

@@ -64,7 +64,34 @@ async function doTransferKhata(){ let fromK=to9(document.getElementById('trFrom'
 function getMonthlyTarget(){ let off=Number(document.getElementById('monthlySelect')?document.getElementById('monthlySelect').value:0); let now=new Date(); return new Date(now.getFullYear(), now.getMonth()+off, 1); }
 function classifyTx(t){ if(t.feeType==='admin-out') return 'admin-out'; if(t.feeType==='transfer') return 'transfer'; if((t.type||'').includes('Pak Title:')) return 'admin-out'; if((t.type||'').includes('OUT->')) return 'transfer'; if(((t.type||'').toUpperCase().startsWith('OUT')||(t.type||'').toUpperCase().startsWith('ADMIN'))) return 'admin-out'; return 'other'; }
 function parseTxDate(s){ try{ let p=s.split(',')[0].split('/'); return new Date(Number(p[2]), Number(p[1])-1, Number(p[0])); }catch(e){ return new Date(s); } }
-function renderMonthlyTotal(){ let target=getMonthlyTarget(); let y=target.getFullYear(), m=target.getMonth(); let monthName=target.toLocaleString('en',{month:'long',year:'numeric'}); let grandAmt=0, grandFee=0, grandCount=0, adminAmt=0, adminFee=0, adminCount=0, trAmt=0, trFee=0, trCount=0; let perKhata=[]; db.customers.forEach(c=>{ let kAmt=0,kFee=0,kCount=0,kAdmin=0,kTr=0; (c.tx||[]).forEach(t=>{ let d=new Date(t.d); if(isNaN(d)) d=parseTxDate(t.d); if(d.getFullYear()!==y||d.getMonth()!==m) return; let kind=classifyTx(t); if(kind==='other') return; if(kind==='admin-out' && (t.type||'').toUpperCase().startsWith('REVERSED')) return; let amt=Number(t.amt||0), fee=Number(t.fee||0); if(fee<0) return; kAmt+=amt; kFee+=fee; kCount++; if(kind==='admin-out'){kAdmin++; adminAmt+=amt; adminFee+=fee; adminCount++;} else {kTr++; trAmt+=amt; trFee+=fee; trCount++;} }); if(kCount>0) perKhata.push({khata:c.khata,name:c.name,amt:kAmt,fee:kFee,count:kCount,admin:kAdmin,tr:kTr}); grandAmt+=kAmt; grandFee+=kFee; grandCount+=kCount; }); perKhata.sort((a,b)=>b.amt-a.amt); let sumEl=document.getElementById('monthlySummary'); if(sumEl) sumEl.innerHTML=`<div style="background:#f0fdf4;border:2px solid #16a34a;padding:12px;border-radius:12px;font-size:13px;line-height:1.7"><b>TOTAL - ${monthName}</b><br>Total Transfers: <b>${grandCount}</b> | Total Amount: <b>${fmt(grandAmt)} PKR</b> | Total Fee: <b>${fmt(grandFee)} PKR</b><br>---<br>Admin OUT (0.1%): ${adminCount} transfers | Amount ${fmt(adminAmt)} | Fee ${fmt(adminFee)}<br>Khata Transfer (0.05%): ${trCount} transfers | Amount ${fmt(trAmt)} | Fee ${fmt(trFee)}</div>`; let listEl=document.getElementById('monthlyList'); if(listEl) listEl.innerHTML=perKhata.map((s,i)=>`<div style="display:flex;justify-content:space-between;padding:12px;border-bottom:1px solid #e2e8f0"><div><b>${i+1}. ${s.name}</b> <span style="font-size:11px;color:#64748b">${s.khata}</span><br><span style="font-size:12px">Transfers: ${s.count} (Admin ${s.admin} + Transfer ${s.tr}) | Fee: ${fmt(s.fee)}</span></div><div style="text-align:right"><b>${fmt(s.amt)} PKR</b></div></div>`).join('')||'No transfers in '+monthName; window._monthlyCache={monthName,grandAmt,grandFee,grandCount,adminAmt,adminFee,adminCount,trAmt,trFee,trCount,perKhata}; }
+function renderMonthlyTotal(){ 
+let target=getMonthlyTarget(); 
+let y=target.getFullYear(), m=target.getMonth(); 
+let monthName=target.toLocaleString('en',{month:'long',year:'numeric'}); 
+let grandAmt=0, grandFee=0, grandCount=0, adminAmt=0, adminFee=0, adminCount=0, trAmt=0, trFee=0, trCount=0; 
+let perKhata=[]; 
+db.customers.forEach(c=>{ 
+let kAdminAmt=0,kAdminFee=0,kAdminCount=0,kTrAmt=0,kTrFee=0,kTrCount=0; 
+(c.tx||[]).forEach(t=>{ 
+let d=new Date(t.d); if(isNaN(d)) d=parseTxDate(t.d); 
+if(d.getFullYear()!==y||d.getMonth()!==m) return; 
+let kind=classifyTx(t); if(kind==='other') return; 
+if(kind==='admin-out' && (t.type||'').toUpperCase().startsWith('REVERSED')) return; 
+let amt=Number(t.amt||0), fee=Number(t.fee||0); if(fee<0) return; 
+if(kind==='admin-out'){kAdminAmt+=amt; kAdminFee+=fee; kAdminCount++; adminAmt+=amt; adminFee+=fee; adminCount++;} 
+else {kTrAmt+=amt; kTrFee+=fee; kTrCount++; trAmt+=amt; trFee+=fee; trCount++;} 
+}); 
+let kTotal=kAdminCount+kTrCount; 
+if(kTotal>0) perKhata.push({khata:c.khata,name:c.name,adminAmt:kAdminAmt,adminFee:kAdminFee,adminCount:kAdminCount,trAmt:kTrAmt,trFee:kTrFee,trCount:kTrCount,totalFee:kAdminFee+kTrFee,totalAmt:kAdminAmt+kTrAmt,totalCount:kTotal}); 
+grandAmt+=kAdminAmt+kTrAmt; grandFee+=kAdminFee+kTrFee; grandCount+=kTotal; 
+}); 
+perKhata.sort((a,b)=>b.totalFee-a.totalFee); 
+let sumEl=document.getElementById('monthlySummary'); 
+if(sumEl) sumEl.innerHTML=`<div style="background:#f0fdf4;border:2px solid #16a34a;padding:12px;border-radius:12px;font-size:13px;line-height:1.7"><b>TOTAL - ${monthName}</b><br>Total Transfers: <b>${grandCount}</b> | Total Amount: <b>${fmt(grandAmt)} PKR</b> | Total Fee: <b>${fmt(grandFee)} PKR</b><br>---<br>Admin OUT (0.1%): ${adminCount} | Amount ${fmt(adminAmt)} | Fee <b>${fmt(adminFee)}</b><br>Khata Transfer (0.05%): ${trCount} | Amount ${fmt(trAmt)} | Fee <b>${fmt(trFee)}</b></div>`; 
+let listEl=document.getElementById('monthlyList'); 
+if(listEl) listEl.innerHTML=perKhata.map((s,i)=>`<div style="padding:12px;border-bottom:1px solid #e2e8f0;background:#fff;border-radius:10px;margin-bottom:8px"><div><b>${i+1}. ${s.name}</b> <span style="font-size:11px;color:#64748b">${s.khata}</span></div><div style="font-size:13px;margin-top:6px;line-height:1.7">Admin OUT: ${s.adminCount} transfers | Amount ${fmt(s.adminAmt)} | <b style="color:#dc2626">Admin Fee: ${fmt(s.adminFee)} PKR</b><br>Khata Transfer: ${s.trCount} transfers | Amount ${fmt(s.trAmt)} | <b style="color:#16a34a">Transfer Fee: ${fmt(s.trFee)} PKR</b><br><b>Total Fee: ${fmt(s.totalFee)} PKR | Total Amount: ${fmt(s.totalAmt)} PKR</b></div></div>`).join('')||'No transfers in '+monthName; 
+window._monthlyCache={monthName,grandAmt,grandFee,grandCount,adminAmt,adminFee,adminCount,trAmt,trFee,trCount,perKhata}; 
+}
 function shareMonthlyTotal(){ if(!window._monthlyCache) renderMonthlyTotal(); let c=window._monthlyCache; let txt=`HAQTAMAT SARAFI - MONTHLY TOTAL - ${c.monthName}\n\nTotal Transfers: ${c.grandCount}\nTotal Amount: ${fmt(c.grandAmt)} PKR\nTotal Fee: ${fmt(c.grandFee)} PKR\n\nAdmin OUT (0.1%): ${c.adminCount} | ${fmt(c.adminAmt)} PKR | Fee ${fmt(c.adminFee)}\nKhata Transfer (0.05%): ${c.trCount} | ${fmt(c.trAmt)} PKR | Fee ${fmt(c.trFee)}\n\n--- Per Khata ---\n`+c.perKhata.map(s=>`${s.name} (${s.khata}) - ${s.count} transfers | ${fmt(s.amt)} PKR | Fee ${fmt(s.fee)}`).join('\n'); window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank'); }
 function downloadOutReceipt(){ alert('Take screenshot of receipt above'); }
 function showAllRefs(){ let refs=[]; db.customers.forEach(c=>{ (c.tx||[]).forEach(t=>{ let m=(t.type||'').match(/HQM-\d+/); if(m) refs.push(m[0]+' - '+c.khata+' - '+fmt(t.amt)+' - '+t.d); }); }); document.getElementById('refList').innerHTML=refs.slice(-30).join('<br>')||'No refs'; }

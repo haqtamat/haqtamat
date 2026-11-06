@@ -58,9 +58,9 @@ function downloadStatementPDF(){ try{ const {jsPDF}=window.jspdf; let doc=new js
 function fullDetail(c,type){ return `<b>${type}</b><br>Name: ${c.name}<br>Account: ${c.khata}<br>Father: ${c.father||'-'}<br>Phone: ${c.phone||'-'}<br>CNIC: ${c.cnic||'-'}<br>Address: ${c.address||'-'}`; }
 function urduWords(n){
   n=Math.floor(Number(n)||0);
-  if(n===0) return "Zero Rupees Only";
-  const ones=["","Ek","Do","Teen","Chaar","Paanch","Che","Saat","Aath","Nau","Das","Gyarah","Barah","Terah","Chaudah","Pandrah","Solah","Satrah","Atharah","Unnis"];
-  const tens=["","","Bees","Tees","Chalees","Pachaas","Saath","Sattar","Assi","Nawwe"];
+  if(n===0) return "صفر روپے صرف";
+  const ones=["","ایک","دو","تین","چار","پانچ","چھ","سات","آٹھ","نو","دس","گیارہ","بارہ","تیرہ","چودہ","پندرہ","سولہ","سترہ","اٹھارہ","انیس"];
+  const tens=["","","بیس","تیس","چالیس","پچاس","ساٹھ","ستر","اسی","نوے"];
   function two(d){
     if(d<20) return ones[d];
     let t=Math.floor(d/10), r=d%10;
@@ -68,24 +68,23 @@ function urduWords(n){
   }
   function three(d){
     let h=Math.floor(d/100), r=d%100, s="";
-    if(h) s+=ones[h]+" Sau";
+    if(h) s+=ones[h]+" سو";
     if(r){ if(s) s+=" "; s+=two(r); }
     return s;
   }
   let parts=[];
-  // Pakistani system: Kharab > Arab > Crore > Lakh > Hazaar
   let kharab=Math.floor(n/100000000000); n%=100000000000;
   let arab=Math.floor(n/1000000000); n%=1000000000;
   let crore=Math.floor(n/10000000); n%=10000000;
   let lakh=Math.floor(n/100000); n%=100000;
   let hazar=Math.floor(n/1000); n%=1000;
-  if(kharab) parts.push(three(kharab)+" Kharab");
-  if(arab) parts.push(three(arab)+" Arab");
-  if(crore) parts.push(three(crore)+" Crore");
-  if(lakh) parts.push(three(lakh)+" Lakh");
-  if(hazar) parts.push(three(hazar)+" Hazaar");
+  if(kharab) parts.push(three(kharab)+" کھرب");
+  if(arab) parts.push(three(arab)+" ارب");
+  if(crore) parts.push(three(crore)+" کروڑ");
+  if(lakh) parts.push(three(lakh)+" لاکھ");
+  if(hazar) parts.push(three(hazar)+" ہزار");
   if(n) parts.push(three(n));
-  return parts.join(" ")+" Rupees Only";
+  return parts.join(" ")+" روپے صرف";
 }
 document.getElementById('trAmt')?.addEventListener('input',()=>{
   let amt=Number(document.getElementById('trAmt').value);

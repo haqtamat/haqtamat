@@ -64,6 +64,8 @@ async function doReverse(){ let ref=document.getElementById('revRef').value.trim
 function logout(){ location.reload(); }
 // Load cloud ONLY - no local fallback
 (async()=>{
+ // WAIT for module script to load Firebase
+ for(let i=0;i<20 && typeof window.cloudLoad!=='function';i++){ await new Promise(r=>setTimeout(r,500)); }
  try{
    let cloud = await window.cloudLoad();
    if(cloud && cloud.length>0){
